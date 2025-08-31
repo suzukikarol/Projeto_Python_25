@@ -1,0 +1,32 @@
+schema-version: v1
+kind: workflow
+metadata:
+  name: enviar-dados-candidato
+  display-name: Enviar Dados do Candidato
+  description: Recebe dados do candidato e envia para o Quick Command
+  version: 0.0.1
+spec:
+  type: reusable
+  label: Enviar Dados
+  jobs:
+    - id: enviar_dados
+      label: Enviar dados para Quick Command
+      steps:
+        - id: coletar_dados
+          label: Coletar dados do usuário
+          name: stackspot-core/python-exec@1
+          type: action
+          inputs:
+            script: |
+              import json
+              with open("dados.json") as f:
+                  dados = json.load(f)
+              print(json.dumps(dados))
+        - id: enviar_quick_command
+          label: Enviar para Quick Command
+          name: stackspot-core/stackspot-ai-quick-command@0
+          type: action
+          inputs:
+            quick_command_slug: receber-dados-do-candidato
+            input_data: |
+              {{outputs.enviar_dados.coletar_dados}}
