@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Gerador de Conteúdo Financeiro</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background-color: #f4f4f4;
+    }
+
+    .container {
+      max-width: 500px;
+      margin: auto;
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+    }
+
+    label, input, textarea, button {
+      display: block;
+      width: 100%;
+      margin-bottom: 15px;
+    }
+
+    input, textarea {
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    button {
+      background-color: #28a745;
+      color: white;
+      border: none;
+      padding: 10px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    #resultado {
+      margin-top: 20px;
+      padding: 10px;
+      background-color: #e9ecef;
+      border-left: 4px solid #28a745;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Gerador de Conteúdo Financeiro</h2>
+    <form id="form">
+      <label for="idade">Idade:</label>
+      <input type="number" id="idade" maxlength="2" required />
+
+      <label for="renda">Renda (R$):</label>
+      <input type="text" id="renda" required />
+
+      <label for="objetivo">Objetivo Financeiro:</label>
+      <textarea id="objetivo" placeholder="Ex: comprar uma casa, viajar, aposentadoria..." required></textarea>
+
+      <button type="submit">Gerar Conteúdo</button>
+    </form>
+
+    <div id="resultado"></div>
+  </div>
+
+  <script>
+    const form = document.getElementById("form");
+    const rendaInput = document.getElementById("renda");
+
+    // Máscara de moeda
+    rendaInput.addEventListener("input", function () {
+      let valor = this.value.replace(/\D/g, "");
+      valor = (valor / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+      this.value = valor;
+    });
+
+    // Submissão do formulário
+    form.addEventListener("submit", async function (e) {
+      e.preventDefault();
+
+      const idade = parseInt(document.getElementById("idade").value);
+      const rendaRaw = rendaInput.value.replace(/[R$\.\,]/g, '').replace(',', '.');
+      const renda = parseFloat(rendaRaw) / 100;
+      const objetivo = document.getElementById("objetivo").value;
+
+      const resposta = await fetch("http://localhost:5000/gerar-conteudo", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ idade, renda, objetivo })
+      });
+
+      const data = await resposta.json();
+      document.getElementById("resultado").innerText = data.conteudo;
+    });
+  </script>
+</body>
+</html>
